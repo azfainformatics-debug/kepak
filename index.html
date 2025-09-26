@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>KEPAK BATARA Rewards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 430px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s;
+        }
+
+        .loading-screen.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            z-index: 5000;
+            padding: 40px 20px;
+        }
+
+        .login-screen.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-logo {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 350px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #27ae60;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-details h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .user-level {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .level-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        /* Points Display */
+        .points-display {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .points-value {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .points-number {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coin-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(255,215,0,0.3);
+        }
+
+        .progress-bar {
+            margin-top: 15px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 10px;
+            background: #e8e8e8;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e8e8e8;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #27ae60;
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Content Sections */
+        .content-section {
+            padding: 20px;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Activity Cards */
+        .activity-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border-color: #27ae60;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .activity-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .activity-points {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .activity-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .activity-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.available {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        /* Achievement Grid */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .achievement-item {
+            text-align: center;
+            padding: 15px 10px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .achievement-item:hover {
+            transform: scale(1.05);
+        }
+
+        .achievement-item.locked {
+            opacity: 0.6;
+            filter: grayscale(100%);
+        }
+
+        .achievement-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .achievement-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .rank-number {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Form Elements */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: #f5f5f5;
+            color: #666;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 25px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            color: #999;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active .nav-icon {
+            color: #27ae60;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .nav-item.active .nav-label {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+            z-index: 3000;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); }
+            to { transform: translate(-50%, 0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <h2 style="color: white; margin-bottom: 10px;">KEPAK BATARA</h2>
+        <p style="color: rgba(255,255,255,0.8);">Memuat aplikasi...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-logo">🌱</div>
+        <div class="login-form">
+            <h2 class="login-title">Selamat Datang</h2>
+            <p class="login-subtitle">Masuk ke KEPAK BATARA Rewards</p>
+            
+            <div class="input-group">
+                <label class="input-label">Nomor HP / NIK</label>
+                <input type="text" id="loginId" class="input-field" placeholder="Contoh: 081234567890">
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">PIN (6 digit)</label>
+                <input type="password" id="loginPin" class="input-field" placeholder="••••••" maxlength="6">
+            </div>
+            
+            <button class="btn-primary" onclick="handleLogin()">Masuk</button>
+            <button class="btn-secondary" onclick="showRegister()">Daftar Baru</button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container" id="mainApp" style="display: none;">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-content">
+                <div class="user-info">
+                    <div class="avatar" id="userAvatar">JD</div>
+                    <div class="user-details">
+                        <h2 id="welcomeText">Selamat Datang!</h2>
+                        <div class="user-level">
+                            <span>Level</span>
+                            <span class="level-badge" id="userLevel">Petani Pemula</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="points-display">
+                    <div class="points-value">
+                        <div>
+                            <div class="points-number" id="userPoints">0</div>
+                            <div style="font-size: 14px; color: #666; margin-top: 5px;">BATARA Points</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 24px; font-weight: bold; color: #27ae60;">🏆 #<span id="userRank">-</span></div>
+                            <div style="font-size: 14px; color: #666;">Peringkat</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-info">
+                            <span>Level Progress</span>
+                            <span><span id="pointsToNext">1000</span> point lagi</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('aktivitas', this)">Aktivitas</button>
+            <button class="nav-tab" onclick="switchTab('prestasi', this)">Prestasi</button>
+            <button class="nav-tab" onclick="switchTab('peringkat', this)">Peringkat</button>
+            <button class="nav-tab" onclick="switchTab('hadiah', this)">Hadiah</button>
+        </div>
+
+        <!-- Content Sections -->
+        <!-- Aktivitas Section -->
+        <div id="aktivitas" class="content-section active">
+            <h3 style="margin-bottom: 20px; color: #333;">Aktivitas Harian</h3>
+            <div id="activitiesList"></div>
+        </div>
+
+        <!-- Prestasi Section -->
+        <div id="prestasi" class="content-section">
+            <h3 style="margin-bottom: 10px; color: #333;">Prestasi & Badge</h3>
+            <p style="color: #999; font-size: 14px; margin-bottom: 20px;">
+                Kumpulkan badge untuk membuka hadiah spesial!
+            </p>
+            <div class="achievement-grid" id="achievementsList"></div>
+        </div>
+
+        <!-- Peringkat Section -->
+        <div id="peringkat" class="content-section">
+            <h3 style="margin-bottom: 20px; color: #333;">Peringkat Mingguan</h3>
+            <div id="leaderboardList"></div>
+        </div>
+
+        <!-- Hadiah Section -->
+        <div id="hadiah" class="content-section">
+            <h3 style="margin-bottom: 20px; color: #333;">Tukar Points</h3>
+            <div id="rewardsList"></div>
+        </div>
+
+        <!-- Modal -->
+        <div id="activityModal" class="modal">
+            <div class="modal-content">
+                <h2 id="modalTitle" style="margin-bottom: 10px;">Judul Aktivitas</h2>
+                <p id="modalSubtitle" style="color: #666; margin-bottom: 20px;">Deskripsi</p>
+                <div id="modalBody"></div>
+                <button class="btn-primary" onclick="submitActivity()">Kirim</button>
+                <button class="btn-secondary" onclick="closeModal()">Batal</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchBottomNav(this, 'home')">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Beranda</span>
+            </div>
+            <div class="nav-item" onclick="switchBottomNav(this, 'progress')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Progress</span>
+            </div>
+            <div class="nav-item" onclick="switchBottomNav(this, 'rewards')">
+                <span class="nav-icon">🎁</span>
+                <span class="nav-label">Hadiah</span>
+            </div>
+            <div class="nav-item" onclick="switchBottomNav(this, 'profile')">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profil</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State Management
+        const AppState = {
+            user: null,
+            activities: [],
+            achievements: [],
+            leaderboard: [],
+            rewards: [],
+            currentActivity: null
+        };
+
+        // Local Storage Management
+        const Storage = {
+            get: (key) => {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (e) {
+                    console.error('Storage get error:', e);
+                    return null;
+                }
+            },
+            set: (key, value) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                    return true;
+                } catch (e) {
+                    console.error('Storage set error:', e);
+                    return false;
+                }
+            },
+            remove: (key) => {
+                localStorage.removeItem(key);
+            }
+        };
+
+        // API Simulation (Backend Mock)
+        const API = {
+            // User Authentication
+            login: async (id, pin) => {
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Check stored users or create demo user
+                const users = Storage.get('kepak_users') || {};
+                
+                if (users[id]) {
+                    if (users[id].pin === pin) {
+                        return { success: true, user: users[id] };
+                    } else {
+                        return { success: false, message: 'PIN salah' };
+                    }
+                } else {
+                    // Auto-register for demo
+                    const newUser = {
+                        id: id,
+                        pin: pin,
+                        name: 'Pengguna Baru',
+                        points: 0,
+                        level: 1,
+                        levelName: 'Petani Pemula',
+                        rank: Math.floor(Math.random() * 50) + 1,
+                        joinDate: new Date().toISOString(),
+                        completedActivities: [],
+                        achievements: []
+                    };
+                    users[id] = newUser;
+                    Storage.set('kepak_users', users);
+                    return { success: true, user: newUser };
+                }
+            },
+
+            // Get Activities
+            getActivities: async () => {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                return [
+                    {
+                        id: 'checkin',
+                        title: '📱 Check-in Harian',
+                        points: 10,
+                        description: 'Lakukan check-in setiap hari untuk mendapatkan bonus points',
+                        type: 'daily',
+                        status: 'available'
+                    },
+                    {
+                        id: 'photo',
+                        title: '📸 Upload Foto Kebun',
+                        points: 25,
+                        description: 'Bagikan progress kebun Anda dengan foto terbaru',
+                        type: 'repeatable',
+                        status: 'available'
+                    },
+                    {
+                        id: 'harvest',
+                        title: '🌾 Catat Hasil Panen',
+                        points: 50,
+                        description: 'Input data hasil panen untuk monitoring produktivitas',
+                        type: 'repeatable',
+                        status: 'available'
+                    },
+                    {
+                        id: 'barter',
+                        title: '🤝 Yuk Barter Batara',
+                        points: 30,
+                        description: 'Tukar hasil panen dengan tetangga melalui sistem barter',
+                        type: 'repeatable',
+                        status: 'available'
+                    },
+                    {
+                        id: 'tutorial',
+                        title: '📚 Ikuti Tutorial',
+                        points: 15,
+                        description: 'Pelajari teknik budidaya baru dari video tutorial',
+                        type: 'repeatable',
+                        status: 'available'
+                    }
+                ];
+            },
+
+            // Get Achievements
+            getAchievements: async () => {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                return [
+                    { id: 'beginner', name: 'Petani Pemula', icon: '🌱', requirement: 'Login pertama', unlocked: true },
+                    { id: 'photographer', name: 'Fotografer Kebun', icon: '📷', requirement: 'Upload 10 foto', unlocked: false, progress: '3/10' },
+                    { id: 'hydroponic', name: 'Hidroponik Master', icon: '🌿', requirement: '5 tanaman hidroponik', unlocked: false, progress: '1/5' },
+                    { id: 'weekly_winner', name: 'Juara Minggu', icon: '🏆', requirement: 'Peringkat 1 mingguan', unlocked: false },
+                    { id: 'elite', name: 'Petani Elite', icon: '⭐', requirement: 'Capai level 10', unlocked: false, locked: true },
+                    { id: 'legend', name: 'Legenda BATARA', icon: '💎', requirement: 'Capai level 20', unlocked: false, locked: true }
+                ];
+            },
+
+            // Get Leaderboard
+            getLeaderboard: async () => {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                return [
+                    { rank: 1, name: 'Ibu Siti Nurjanah', location: 'Desa Trahean', points: 4820 },
+                    { rank: 2, name: 'Pak Ahmad Subandi', location: 'Desa Melayu', points: 4550 },
+                    { rank: 3, name: 'Ibu Ratna Dewi', location: 'Desa Trahean', points: 3890 },
+                    { rank: 4, name: 'Pak Joko Widodo', location: 'Desa Melayu', points: 3200 },
+                    { rank: 5, name: 'Ibu Mega Wati', location: 'Desa Trahean', points: 2900 }
+                ];
+            },
+
+            // Get Rewards
+            getRewards: async () => {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                return [
+                    {
+                        id: 'seeds',
+                        title: '🌱 Paket Bibit Sayuran',
+                        points: 500,
+                        description: '10 jenis bibit sayuran pilihan untuk kebun Anda',
+                        stock: 50
+                    },
+                    {
+                        id: 'nutrients',
+                        title: '💧 Nutrisi Hidroponik',
+                        points: 750,
+                        description: 'Paket nutrisi AB Mix untuk sistem hidroponik',
+                        stock: 30
+                    },
+                    {
+                        id: 'workshop',
+                        title: '📚 Workshop Premium',
+                        points: 1000,
+                        description: 'Akses workshop urban farming dengan expert',
+                        stock: 10
+                    }
+                ];
+            },
+
+            // Submit Activity
+            submitActivity: async (activityId, data) => {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Update user points
+                const activity = AppState.activities.find(a => a.id === activityId);
+                if (activity) {
+                    AppState.user.points += activity.points;
+                    
+                    // Save to storage
+                    const users = Storage.get('kepak_users') || {};
+                    if (users[AppState.user.id]) {
+                        users[AppState.user.id].points = AppState.user.points;
+                        Storage.set('kepak_users', users);
+                    }
+                    
+                    return { success: true, points: activity.points };
+                }
+                
+                return { success: false, message: 'Aktivitas tidak ditemukan' };
+            }
+        };
+
+        // Initialize App
+        async function initApp() {
+            // Check if user is logged in
+            const savedUser = Storage.get('current_user');
+            
+            if (savedUser) {
+                AppState.user = savedUser;
+                await loadUserData();
+                showMainApp();
+            } else {
+                showLoginScreen();
+            }
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hide');
+            }, 1500);
+        }
+
+        // Show Login Screen
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.add('active');
+            document.getElementById('mainApp').style.display = 'none';
+        }
+
+        // Show Main App
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.remove('active');
+            document.getElementById('mainApp').style.display = 'block';
+            updateUI();
+        }
+
+        // Handle Login
+        async function handleLogin() {
+            const id = document.getElementById('loginId').value.trim();
+            const pin = document.getElementById('loginPin').value.trim();
+            
+            if (!id || !pin) {
+                showNotification('Masukkan Nomor HP/NIK dan PIN', 'error');
+                return;
+            }
+            
+            if (pin.length !== 6) {
+                showNotification('PIN harus 6 digit', 'error');
+                return;
+            }
+            
+            showNotification('Sedang masuk...');
+            
+            const result = await API.login(id, pin);
+            
+            if (result.success) {
+                AppState.user = result.user;
+                Storage.set('current_user', result.user);
+                await loadUserData();
+                showMainApp();
+                showNotification('Berhasil masuk!', 'success');
+            } else {
+                showNotification(result.message || 'Login gagal', 'error');
+            }
+        }
+
+        // Load User Data
+        async function loadUserData() {
+            // Load all data
+            AppState.activities = await API.getActivities();
+            AppState.achievements = await API.getAchievements();
+            AppState.leaderboard = await API.getLeaderboard();
+            AppState.rewards = await API.getRewards();
+            
+            // Update UI with loaded data
+            renderActivities();
+            renderAchievements();
+            renderLeaderboard();
+            renderRewards();
+        }
+
+        // Update UI
+        function updateUI() {
+            if (!AppState.user) return;
+            
+            // Update header
+            document.getElementById('welcomeText').textContent = `Selamat Datang, ${AppState.user.name}!`;
+            document.getElementById('userAvatar').textContent = AppState.user.name.substring(0, 2).toUpperCase();
+            document.getElementById('userLevel').textContent = AppState.user.levelName;
+            document.getElementById('userPoints').textContent = AppState.user.points.toLocaleString('id-ID');
+            document.getElementById('userRank').textContent = AppState.user.rank;
+            
+            // Update progress bar
+            const levelProgress = (AppState.user.points % 1000) / 10;
+            document.getElementById('progressBar').style.width = levelProgress + '%';
+            document.getElementById('pointsToNext').textContent = 1000 - (AppState.user.points % 1000);
+        }
+
+        // Render Activities
+        function renderActivities() {
+            const container = document.getElementById('activitiesList');
+            container.innerHTML = '';
+            
+            AppState.activities.forEach(activity => {
+                const card = document.createElement('div');
+                card.className = 'activity-card';
+                card.onclick = () => openActivityModal(activity);
+                
+                card.innerHTML = `
+                    <div class="activity-header">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-points">+${activity.points} 🪙</div>
+                    </div>
+                    <div class="activity-description">${activity.description}</div>
+                    <div class="activity-status">
+                        <span class="status-badge ${activity.status}">${getStatusText(activity.status)}</span>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Render Achievements
+        function renderAchievements() {
+            const container = document.getElementById('achievementsList');
+            container.innerHTML = '';
+            
+            AppState.achievements.forEach(achievement => {
+                const item = document.createElement('div');
+                item.className = 'achievement-item' + (achievement.locked ? ' locked' : '');
+                
+                item.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div style="font-size: 10px; color: #999;">
+                        ${achievement.unlocked ? '✓ Tercapai' : achievement.progress || achievement.requirement}
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        // Render Leaderboard
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboardList');
+            container.innerHTML = '';
+            
+            AppState.leaderboard.forEach(entry => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                if (entry.name === AppState.user.name) {
+                    item.style.border = '2px solid #27ae60';
+                }
+                
+                item.innerHTML = `
+                    <div class="rank-number">${entry.rank}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #333;">${entry.name}</div>
+                        <div style="font-size: 12px; color: #999;">${entry.location}</div>
+                    </div>
+                    <div style="font-weight: bold; color: #27ae60; font-size: 18px;">
+                        ${entry.points.toLocaleString('id-ID')}
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        // Render Rewards
+        function renderRewards() {
+            const container = document.getElementById('rewardsList');
+            container.innerHTML = '';
+            
+            AppState.rewards.forEach(reward => {
+                const card = document.createElement('div');
+                card.className = 'activity-card';
+                
+                const canRedeem = AppState.user.points >= reward.points;
+                
+                card.innerHTML = `
+                    <div class="activity-header">
+                        <div class="activity-title">${reward.title}</div>
+                        <div class="activity-points">${reward.points} 🪙</div>
+                    </div>
+                    <div class="activity-description">${reward.description}</div>
+                    <div style="color: #999; font-size: 12px; margin-bottom: 10px;">
+                        Stok tersisa: ${reward.stock}
+                    </div>
+                    <button class="btn-primary" ${!canRedeem ? 'disabled style="opacity: 0.5;"' : ''} 
+                            onclick="redeemReward('${reward.id}')">
+                        ${canRedeem ? 'Tukar Sekarang' : 'Points Tidak Cukup'}
+                    </button>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Open Activity Modal
+        function openActivityModal(activity) {
+            AppState.currentActivity = activity;
+            const modal = document.getElementById('activityModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = activity.title;
+            modalSubtitle.textContent = activity.description;
+            
+            // Generate form based on activity type
+            switch(activity.id) {
+                case 'checkin':
+                    modalBody.innerHTML = `
+                        <div style="text-align: center; padding: 40px 0;">
+                            <div style="font-size: 64px; margin-bottom: 20px;">📍</div>
+                            <p>Konfirmasi check-in harian Anda</p>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'photo':
+                    modalBody.innerHTML = `
+                        <div class="input-group">
+                            <label class="input-label">Pilih Foto</label>
+                            <input type="file" accept="image/*" class="input-field" id="photoFile">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Deskripsi</label>
+                            <textarea class="input-field" rows="3" id="photoDesc" 
+                                      placeholder="Ceritakan tentang foto ini..."></textarea>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'harvest':
+                    modalBody.innerHTML = `
+                        <div class="input-group">
+                            <label class="input-label">Jenis Tanaman</label>
+                            <select class="input-field" id="harvestType">
+                                <option>Kangkung</option>
+                                <option>Bayam</option>
+                                <option>Sawi</option>
+                                <option>Tomat</option>
+                                <option>Cabai</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Jumlah (kg)</label>
+                            <input type="number" class="input-field" id="harvestAmount" 
+                                   placeholder="0.0" step="0.1" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Tanggal Panen</label>
+                            <input type="date" class="input-field" id="harvestDate" 
+                                   value="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'barter':
+                    modalBody.innerHTML = `
+                        <div class="input-group">
+                            <label class="input-label">Yang Anda Tawarkan</label>
+                            <input type="text" class="input-field" id="barterOffer" 
+                                   placeholder="Contoh: 2kg Kangkung">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Yang Anda Inginkan</label>
+                            <input type="text" class="input-field" id="barterWant" 
+                                   placeholder="Contoh: 1kg Tomat">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Lokasi Barter</label>
+                            <input type="text" class="input-field" id="barterLocation" 
+                                   placeholder="Contoh: Pasar Desa Trahean">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'tutorial':
+                    modalBody.innerHTML = `
+                        <div class="input-group">
+                            <label class="input-label">Pilih Tutorial</label>
+                            <select class="input-field" id="tutorialType">
+                                <option>Teknik Hidroponik Dasar</option>
+                                <option>Cara Membuat Pupuk Organik</option>
+                                <option>Pengendalian Hama Alami</option>
+                                <option>Sistem Irigasi Tetes</option>
+                            </select>
+                        </div>
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">📺</div>
+                            <p>Video tutorial akan dimulai setelah konfirmasi</p>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        // Submit Activity
+        async function submitActivity() {
+            if (!AppState.currentActivity) return;
+            
+            showNotification('Mengirim...');
+            
+            // Collect form data based on activity type
+            let formData = {};
+            
+            switch(AppState.currentActivity.id) {
+                case 'photo':
+                    formData = {
+                        file: document.getElementById('photoFile')?.value,
+                        description: document.getElementById('photoDesc')?.value
+                    };
+                    break;
+                    
+                case 'harvest':
+                    formData = {
+                        type: document.getElementById('harvestType')?.value,
+                        amount: document.getElementById('harvestAmount')?.value,
+                        date: document.getElementById('harvestDate')?.value
+                    };
+                    break;
+                    
+                case 'barter':
+                    formData = {
+                        offer: document.getElementById('barterOffer')?.value,
+                        want: document.getElementById('barterWant')?.value,
+                        location: document.getElementById('barterLocation')?.value
+                    };
+                    break;
+            }
+            
+            const result = await API.submitActivity(AppState.currentActivity.id, formData);
+            
+            if (result.success) {
+                updateUI();
+                closeModal();
+                showNotification(`Berhasil! +${result.points} Points ditambahkan`, 'success');
+                
+                // Animate points
+                animatePoints();
+            } else {
+                showNotification(result.message || 'Gagal mengirim aktivitas', 'error');
+            }
+        }
+
+        // Animate Points
+        function animatePoints() {
+            const pointsElement = document.getElementById('userPoints');
+            pointsElement.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                pointsElement.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('activityModal').classList.remove('active');
+            AppState.currentActivity = null;
+        }
+
+        // Switch Tab
+        function switchTab(tabName, element) {
+            // Update tab buttons
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Update content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Switch Bottom Navigation
+        function switchBottomNav(element, page) {
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Handle page navigation
+            switch(page) {
+                case 'home':
+                    switchTab('aktivitas', document.querySelector('.nav-tab'));
+                    break;
+                case 'progress':
+                    switchTab('prestasi', document.querySelectorAll('.nav-tab')[1]);
+                    break;
+                case 'rewards':
+                    switchTab('hadiah', document.querySelectorAll('.nav-tab')[3]);
+                    break;
+                case 'profile':
+                    showProfile();
+                    break;
+            }
+        }
+
+        // Show Profile
+        function showProfile() {
+            showNotification('Fitur Profil segera hadir!', 'info');
+        }
+
+        // Redeem Reward
+        async function redeemReward(rewardId) {
+            const reward = AppState.rewards.find(r => r.id === rewardId);
+            if (!reward) return;
+            
+            if (AppState.user.points < reward.points) {
+                showNotification('Points tidak cukup!', 'error');
+                return;
+            }
+            
+            if (confirm(`Tukar ${reward.points} points untuk ${reward.title}?`)) {
+                AppState.user.points -= reward.points;
+                
+                // Update storage
+                const users = Storage.get('kepak_users') || {};
+                if (users[AppState.user.id]) {
+                    users[AppState.user.id].points = AppState.user.points;
+                    Storage.set('kepak_users', users);
+                }
+                
+                Storage.set('current_user', AppState.user);
+                
+                updateUI();
+                showNotification('Berhasil! Hadiah akan segera dikirim.', 'success');
+            }
+        }
+
+        // Get Status Text
+        function getStatusText(status) {
+            const statusMap = {
+                'completed': '✓ Selesai',
+                'available': 'Tersedia',
+                'progress': 'Sedang Berjalan'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Show Notification
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            // Style based on type
+            if (type === 'success') {
+                notification.style.background = '#27ae60';
+            } else if (type === 'error') {
+                notification.style.background = '#e74c3c';
+            } else if (type === 'info') {
+                notification.style.background = '#3498db';
+            }
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Show Register
+        function showRegister() {
+            showNotification('Silakan daftar dengan memasukkan data Anda', 'info');
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        // Prevent form submission on Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                e.preventDefault();
+                if (document.getElementById('loginScreen').classList.contains('active')) {
+                    handleLogin();
+                }
+            }
+        });
+
+        // Handle back button
+        window.addEventListener('popstate', function(e) {
+            e.preventDefault();
+            if (confirm('Keluar dari aplikasi?')) {
+                Storage.remove('current_user');
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>
