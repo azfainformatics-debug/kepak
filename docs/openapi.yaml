@@ -1,0 +1,97 @@
+openapi: 3.0.3
+info:
+  title: e-Kinerja LKjIP Kabupaten Banjar API
+  version: 1.0.0-mvp
+servers:
+  - url: /api/v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+paths:
+  /auth/login:
+    post:
+      summary: Login API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: OK
+  /pk/{id}/verify-kab:
+    post:
+      summary: Verifikasi PK tingkat kabupaten
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: PK diverifikasi
+  /realisasi/{id}/verify-kab:
+    post:
+      summary: Verifikasi realisasi kabupaten
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Realisasi diverifikasi
+  /dashboard/monev/summary:
+    get:
+      summary: Ringkasan monev triwulan
+      parameters:
+        - in: query
+          name: tahun
+          schema: { type: integer }
+        - in: query
+          name: triwulan
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Heatmap dan antrian verifikasi
+  /lkjip/kab/{id}/approve-sekda:
+    post:
+      summary: Approval Sekda tahap 1
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Disetujui Sekda
+  /lkjip/kab/{id}/approve-bupati:
+    post:
+      summary: Approval final Bupati
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Disetujui Bupati

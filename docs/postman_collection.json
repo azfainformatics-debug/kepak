@@ -1,0 +1,36 @@
+{
+  "info": {
+    "name": "e-Kinerja LKjIP Banjar MVP",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth Login",
+      "request": {
+        "method": "POST",
+        "header": [{"key":"Content-Type","value":"application/json"}],
+        "url": "{{baseUrl}}/api/v1/auth/login",
+        "body": {"mode":"raw","raw":"{\n  \"email\": \"admin@banjarkab.go.id\",\n  \"password\": \"secret\"\n}"}
+      }
+    },
+    {
+      "name": "Verifikasi PK Kabupaten",
+      "request": {
+        "method": "POST",
+        "header": [{"key":"Authorization","value":"Bearer {{token}}"}],
+        "url": "{{baseUrl}}/api/v1/pk/1/verify-kab"
+      }
+    },
+    {
+      "name": "Dashboard Monev Summary",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/dashboard/monev/summary?tahun=2026&triwulan=1"
+      }
+    }
+  ],
+  "variable": [
+    {"key":"baseUrl","value":"http://localhost:8080"},
+    {"key":"token","value":""}
+  ]
+}
